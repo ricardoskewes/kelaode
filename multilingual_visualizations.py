@@ -259,6 +259,9 @@ def create_benchmark_heatmap(df, output_dir="reports/visualizations/multilingual
     # Create a custom colormap (green for better efficiency, red for worse)
     cmap = LinearSegmentedColormap.from_list('efficiency_cmap', ['#ff9999', '#ffffff', '#99ff99'], N=100)
     
+    # Convert data to float to avoid dtype issues
+    heatmap_data = heatmap_data.astype(float)
+    
     # Create heatmap
     sns.heatmap(heatmap_data, annot=True, cmap=cmap, center=1.0, fmt='.2f', linewidths=.5)
     
