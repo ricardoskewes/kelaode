@@ -40,9 +40,13 @@ def load_results():
             with open(latest_file, 'r') as f:
                 anthropic_results = json.load(f)
             
-            # Filter for long-context QA problems only
+            # Filter for long-context QA problems (both HotpotQA and longqa)
             anthropic_df = pd.DataFrame(anthropic_results)
-            anthropic_df = anthropic_df[anthropic_df['problem_id'].str.startswith('longqa_')]
+            anthropic_df = anthropic_df[
+                (anthropic_df['problem_id'].str.startswith('hotpotqa_')) | 
+                (anthropic_df['problem_id'].str.startswith('longqa_')) |
+                (anthropic_df['benchmark'] == 'HotpotQA')
+            ]
             print(f"Loaded {len(anthropic_df)} Anthropic long-context QA results")
         else:
             print("No Anthropic interim results found")
