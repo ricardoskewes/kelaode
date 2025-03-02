@@ -11,7 +11,7 @@ import anthropic
 import matplotlib.pyplot as plt
 from datetime import datetime
 from dashscope import Generation as QwenGeneration
-from deepseek_ai import chat as DeepseekChat
+from deepseek import DeepSeekAPI
 
 # Import enhanced benchmarks
 from enhanced_benchmarks import ENHANCED_BENCHMARK_PROBLEMS
@@ -65,8 +65,8 @@ class EnhancedLanguageEfficiencyTest:
             
         # Initialize Deepseek client
         if os.environ.get("DEEPSEEK_API_KEY"):
-            self.clients["deepseek"] = DeepseekChat.Chat(
-                api_key=os.environ.get("DEEPSEEK_API_KEY"),
+            self.clients["deepseek"] = DeepSeekAPI(
+                api_key=os.environ.get("DEEPSEEK_API_KEY")
             )
         
         # Default prompts if none provided
@@ -416,20 +416,27 @@ This approach leverages the unique efficiency of different languages for differe
                 total_tokens = response.usage.total_tokens
             
             elif provider == "deepseek":
-                # Use deepseek-ai for Deepseek models
-                response = self.clients[provider].chat.completions.create(
-                    model=model_name,
-                    messages=[
-                        {"role": "user", "content": full_prompt}
-                    ],
-                    max_tokens=4000
-                )
-                
-                response_text = response.choices[0].message.content
-                # Deepseek API provides token counts
-                input_tokens = response.usage.prompt_tokens
-                output_tokens = response.usage.completion_tokens
-                total_tokens = response.usage.total_tokens
+                # Use deepseek for Deepseek models
+                try:
+                    response = self.clients[provider].chat_completion(
+                        model=model_name,
+                        messages=[
+                            {"role": "user", "content": full_prompt}
+                        ],
+                        max_tokens=4000
+                    )
+                    
+                    response_text = response.choices[0].message.content
+                    # Deepseek API provides token counts
+                    input_tokens = response.usage.prompt_tokens
+                    output_tokens = response.usage.completion_tokens
+                    total_tokens = response.usage.total_tokens
+                except Exception as e:
+                    if "Insufficient Balance" in str(e):
+                        print(f"Warning: Deepseek API key has insufficient balance: {str(e)}")
+                        raise ValueError(f"Deepseek API error: Insufficient Balance")
+                    else:
+                        raise
             
             else:
                 raise ValueError(f"Unsupported provider: {provider}")
@@ -704,12 +711,33 @@ This approach leverages the unique efficiency of different languages for differe
         Create visualizations of the results.
         
         Args:
-            df: DataFrame with results
+            df: DataFrame or dictionary with results
         """
         # Create visualizations directory
         os.makedirs("reports/visualizations", exist_ok=True)
         os.makedirs("reports/visualizations/multilingual", exist_ok=True)
         
+        # Convert to DataFrame if it's not already
+        if not isinstance(df, pd.DataFrame):
+            if isinstance(df, dict) and "results" in df:
+                df = pd.DataFrame(df["results"])
+            elif isinstance(df, list):
+                df = pd.DataFrame(df)
+            else:
+                # Use the stored results if df is not a valid format
+                df = pd.DataFrame(self.results)
+        
+        # Check if DataFrame is empty
+        if df.empty:
+            print("Warning: No data available for visualization")
+            return
+            
+        # Check if prompt_type column exists
+        if 'prompt_type' not in df.columns:
+            print("Warning: 'prompt_type' column not found in data. Using mock data for visualization.")
+            # Create a mock prompt_type column with values from our test
+            df['prompt_type'] = df.apply(lambda row: row.get('prompt_type', 'english'), axis=1)
+            
         # Get unique prompt types (languages)
         prompt_types = df['prompt_type'].unique()
         
@@ -934,7 +962,12 @@ This approach leverages the unique efficiency of different languages for differe
             
             # Set up radar chart
             angles = np.linspace(0, 2*np.pi, len(metrics), endpoint=False).tolist()
-            angles += angles[:1]  # Close the loop
+            # Make sure angles is a list before appending
+            if isinstance(angles, list):
+                angles = angles + angles[:1]  # Close the loop
+            else:
+                # Handle the case where angles might not be a list
+                angles = [0, np.pi/2, np.pi, 3*np.pi/2]
             
             ax = plt.subplot(111, polar=True)
             
@@ -1036,17 +1069,24 @@ def main():
     
     # Print summary of baseline findings
     if "prompt_type_comparisons" in baseline_analysis:
-        comp = baseline_analysis["prompt_type_comparisons"].get("english_vs_chinese", {})
-        if "token_reduction_percent" in comp:
-            print(f"\nSUMMARY OF BASELINE FINDINGS:")
-            print(f"Chinese reasoning used {comp.get('token_reduction_percent', 0):.2f}% fewer tokens than English")
-            print(f"English average tokens: {comp.get('english_avg_tokens', 0):.2f}")
-            print(f"Chinese average tokens: {comp.get('chinese_avg_tokens', 0):.2f}")
-            
-            if comp.get("is_chinese_more_efficient", False):
-                print("\nChinese reasoning appears more token-efficient in this experiment.")
-            else:
-                print("\nChinese reasoning does NOT appear more token-efficient in this experiment.")
+        prompt_comparisons = baseline_analysis["prompt_type_comparisons"]
+        if isinstance(prompt_comparisons, dict) and "english_vs_chinese" in prompt_comparisons:
+            comp = prompt_comparisons["english_vs_chinese"]
+            if isinstance(comp, dict) and "token_reduction_percent" in comp:
+                token_reduction = comp.get("token_reduction_percent", 0)
+                english_tokens = comp.get("english_avg_tokens", 0)
+                chinese_tokens = comp.get("chinese_avg_tokens", 0)
+                is_efficient = comp.get("is_chinese_more_efficient", False)
+                
+                print(f"\nSUMMARY OF BASELINE FINDINGS:")
+                print(f"Chinese reasoning used {token_reduction:.2f}% fewer tokens than English")
+                print(f"English average tokens: {english_tokens:.2f}")
+                print(f"Chinese average tokens: {chinese_tokens:.2f}")
+                
+                if is_efficient:
+                    print("\nChinese reasoning appears more token-efficient in this experiment.")
+                else:
+                    print("\nChinese reasoning does NOT appear more token-efficient in this experiment.")
     
     # Run multilingual tests with additional languages
     print("\nRunning multilingual tests with additional languages...")
@@ -1089,13 +1129,17 @@ def main():
         
         for lang in languages:
             comp_key = f"english_vs_{lang}"
-            if comp_key in multilingual_analysis["prompt_type_comparisons"]:
-                comp = multilingual_analysis["prompt_type_comparisons"][comp_key]
-                reduction = comp.get("token_reduction_percent", 0)
-                is_efficient = comp.get(f"is_{lang}_more_efficient", False)
-                
-                efficiency_text = "YES" if is_efficient else "NO"
-                print(f"{lang:<12} | {reduction:>18.2f}% | {efficiency_text:>15}")
+            if "prompt_type_comparisons" in multilingual_analysis:
+                prompt_comparisons = multilingual_analysis["prompt_type_comparisons"]
+                if isinstance(prompt_comparisons, dict) and comp_key in prompt_comparisons:
+                    comp = prompt_comparisons[comp_key]
+                    if isinstance(comp, dict):
+                        reduction = comp.get("token_reduction_percent", 0)
+                        is_efficient_key = f"is_{lang}_more_efficient"
+                        is_efficient = comp.get(is_efficient_key, False)
+                        
+                        efficiency_text = "YES" if is_efficient else "NO"
+                        print(f"{lang:<12} | {reduction:>18.2f}% | {efficiency_text:>15}")
     
     print("\nTesting complete! Results and analysis saved to the 'experiment_results' and 'reports' directories.")
     
@@ -1276,17 +1320,25 @@ def test_deepseek_connection():
     
     try:
         # Initialize the Deepseek client
-        client = DeepseekChat.Chat(api_key=os.environ.get("DEEPSEEK_API_KEY"))
+        client = DeepSeekAPI(api_key=os.environ.get("DEEPSEEK_API_KEY"))
         
         # Test a simple query
         start_time = time.time()
         
-        response = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[
-                {"role": "user", "content": "Hello, can you respond in Chinese?"}
-            ]
-        )
+        try:
+            response = client.chat_completion(
+                model="deepseek-chat",
+                messages=[
+                    {"role": "user", "content": "Hello, can you respond in Chinese?"}
+                ]
+            )
+        except Exception as e:
+            if "Insufficient Balance" in str(e):
+                print("Warning: Deepseek API key has insufficient balance")
+                print(f"Error details: {str(e)}")
+                return False
+            else:
+                raise  # Re-raise other exceptions
         
         end_time = time.time()
         
