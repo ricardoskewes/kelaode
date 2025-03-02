@@ -1,0 +1,52 @@
+{
+  "heatmap_data": {
+    "hard": {
+      "ARC-Challenge": 2.72459499263623,
+      "BBH": -12.996389891696749,
+      "GSM8K": -7.467532467532467,
+      "HotpotQA": NaN,
+      "MATH": NaN
+    },
+    "medium": {
+      "ARC-Challenge": NaN,
+      "BBH": NaN,
+      "GSM8K": NaN,
+      "HotpotQA": -16.625615763546797,
+      "MATH": 28.945554789800138
+    }
+  },
+  "density_data": {
+    "metrics": {
+      "english": {
+        "bits_per_token": 15.556590164961046,
+        "chars_per_token": 0.3675143560295324,
+        "total_tokens": 537.6
+      },
+      "chinese": {
+        "bits_per_token": 7.089881229434772,
+        "chars_per_token": 0.5359411713292104,
+        "total_tokens": 523.1
+      }
+    },
+    "differences": {
+      "bits_per_token_diff": -54.42522330244518,
+      "chars_per_token_diff": 45.828635680872196,
+      "total_tokens_diff": -2.6971726190476186
+    }
+  },
+  "significance_data": [
+    {
+      "comparison": "english_vs_chinese",
+      "p_value": 0.7911891734985921,
+      "mean_difference": 14.5,
+      "significant": false
+    }
+  ],
+  "radar_data": {
+    "MATH": 28.945554789800138,
+    "BBH": -12.996389891696749,
+    "HotpotQA": -16.625615763546797,
+    "ARC-Challenge": 2.72459499263623,
+    "GSM8K": -7.467532467532467
+  }
+}

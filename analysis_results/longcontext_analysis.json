@@ -1,0 +1,81 @@
+{
+  "efficiency": [
+    {
+      "language": "strategic",
+      "efficiency": 1.9234474166576394
+    },
+    {
+      "language": "japanese",
+      "efficiency": -3.9421222690918265
+    },
+    {
+      "language": "german",
+      "efficiency": -6.6371137463280565
+    },
+    {
+      "language": "chinese",
+      "efficiency": -6.789771215626847
+    },
+    {
+      "language": "russian",
+      "efficiency": -9.091376137362369
+    },
+    {
+      "language": "arabic",
+      "efficiency": -12.009482377419904
+    },
+    {
+      "language": "korean",
+      "efficiency": -14.704473854656152
+    },
+    {
+      "language": "finnish",
+      "efficiency": -18.14513835500568
+    }
+  ],
+  "efficiency_by_length": {
+    "nan": {
+      "chinese": NaN,
+      "finnish": NaN,
+      "german": NaN,
+      "japanese": NaN,
+      "korean": NaN,
+      "russian": NaN,
+      "arabic": NaN,
+      "strategic": NaN
+    }
+  },
+  "correlations": {
+    "english": NaN,
+    "chinese": NaN,
+    "finnish": NaN,
+    "german": NaN,
+    "japanese": NaN,
+    "korean": NaN,
+    "russian": NaN,
+    "arabic": NaN,
+    "strategic": NaN
+  },
+  "strategic_vs_fixed": {
+    "english": 1.9234474166576394,
+    "chinese": 8.15922586320651,
+    "finnish": 16.986383063313784,
+    "german": 8.027750247770065,
+    "japanese": 5.6431113370615185,
+    "korean": 14.496314496314497,
+    "russian": 10.096878363832076,
+    "arabic": 12.439062745714729
+  },
+  "strategic_by_length": {
+    "nan": {
+      "english": NaN,
+      "chinese": NaN,
+      "finnish": NaN,
+      "german": NaN,
+      "japanese": NaN,
+      "korean": NaN,
+      "russian": NaN,
+      "arabic": NaN
+    }
+  }
+}

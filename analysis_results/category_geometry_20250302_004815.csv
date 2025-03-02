@@ -1,0 +1,4 @@
+prompt_type,mean,std,count,token_reduction,efficiency_percent,more_efficient_than_english
+chinese,572.0,,1,55.0,8.771929824561402,True
+english,627.0,,1,0.0,0.0,False
+finnish,539.0,,1,88.0,14.035087719298245,True

@@ -1,0 +1,90 @@
+{
+  "efficiency_results": {
+    "overall_language_efficiency": [
+      {
+        "prompt_type": "arabic",
+        "mean": 587.0,
+        "std": 127.36168968728391,
+        "count": 3,
+        "token_reduction": -13.0,
+        "efficiency_percent": -2.264808362369338,
+        "more_efficient_than_english": false
+      },
+      {
+        "prompt_type": "chinese",
+        "mean": 516.0,
+        "std": 67.38446903157036,
+        "count": 4,
+        "token_reduction": 58.0,
+        "efficiency_percent": 10.104529616724738,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "english",
+        "mean": 574.0,
+        "std": 130.13326502730447,
+        "count": 4,
+        "token_reduction": 0.0,
+        "efficiency_percent": 0.0,
+        "more_efficient_than_english": false
+      },
+      {
+        "prompt_type": "finnish",
+        "mean": 533.25,
+        "std": 16.66083231214256,
+        "count": 4,
+        "token_reduction": 40.75,
+        "efficiency_percent": 7.099303135888501,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "german",
+        "mean": 524.0,
+        "std": 84.33860326090301,
+        "count": 3,
+        "token_reduction": 50.0,
+        "efficiency_percent": 8.710801393728223,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "japanese",
+        "mean": 510.3333333333333,
+        "std": 101.68742957383343,
+        "count": 3,
+        "token_reduction": 63.666666666666686,
+        "efficiency_percent": 11.091753774680607,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "korean",
+        "mean": 567.3333333333334,
+        "std": 26.274195198584753,
+        "count": 3,
+        "token_reduction": 6.666666666666629,
+        "efficiency_percent": 1.161440185830423,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "russian",
+        "mean": 511.6666666666667,
+        "std": 65.65312889218102,
+        "count": 3,
+        "token_reduction": 62.333333333333314,
+        "efficiency_percent": 10.859465737514515,
+        "more_efficient_than_english": true
+      },
+      {
+        "prompt_type": "strategic",
+        "mean": 517.3333333333334,
+        "std": 40.377386410382414,
+        "count": 3,
+        "token_reduction": 56.66666666666663,
+        "efficiency_percent": 9.872241579558647,
+        "more_efficient_than_english": true
+      }
+    ],
+    "statistical_significance": {
+      "english_vs_chinese": {
+        "t_statistic": 0.791567641661698,
+        "p_value": 0.46825207579880235,
+        "significant_at_0.05": 
