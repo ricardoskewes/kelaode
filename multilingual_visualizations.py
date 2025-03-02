@@ -412,6 +412,317 @@ def create_combined_language_efficiency_index(df, output_dir="reports/visualizat
     
     return clei_df
 
+def create_model_comparison_visualizations(df, output_dir="reports/visualizations/model_comparison"):
+    """
+    Create visualizations comparing different models (Anthropic vs. Deepseek) across languages.
+    
+    Args:
+        df: DataFrame with experiment results
+        output_dir: Directory to save visualizations
+    """
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Check if we have multiple models
+    models = df['model'].unique()
+    if len(models) <= 1:
+        print("Only one model found in data. Model comparison visualizations skipped.")
+        return None
+    
+    # Check if we have Deepseek models
+    has_deepseek = any('deepseek' in model.lower() for model in models)
+    if not has_deepseek:
+        print("No Deepseek models found in data. Model comparison visualizations skipped.")
+        return None
+    
+    # 1. Token usage by model and language
+    plt.figure(figsize=(16, 10))
+    model_lang_data = df.pivot_table(
+        values='total_tokens',
+        index='model',
+        columns='prompt_type',
+        aggfunc='mean'
+    )
+    model_lang_data.plot(kind='bar', title='Token Usage by Model and Language')
+    plt.ylabel('Average Total Tokens')
+    plt.xlabel('Model')
+    plt.xticks(rotation=45)
+    plt.legend(title='Language')
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/token_usage_by_model_language.png')
+    plt.close()
+    
+    # 2. Chinese efficiency by model
+    plt.figure(figsize=(14, 8))
+    
+    # Calculate Chinese efficiency for each model
+    chinese_efficiency = []
+    
+    for model in models:
+        model_df = df[df['model'] == model]
+        
+        english_df = model_df[model_df['prompt_type'] == 'english']
+        chinese_df = model_df[model_df['prompt_type'] == 'chinese']
+        
+        if english_df.empty or chinese_df.empty:
+            continue
+            
+        english_tokens = english_df['total_tokens'].mean()
+        chinese_tokens = chinese_df['total_tokens'].mean()
+        
+        efficiency_gain = ((english_tokens - chinese_tokens) / english_tokens) * 100 if english_tokens > 0 else 0
+        
+        chinese_efficiency.append({
+            'model': model,
+            'english_tokens': english_tokens,
+            'chinese_tokens': chinese_tokens,
+            'efficiency_gain': efficiency_gain,
+            'is_chinese_more_efficient': efficiency_gain > 0
+        })
+    
+    # Create DataFrame
+    efficiency_df = pd.DataFrame(chinese_efficiency)
+    
+    # Sort by efficiency gain
+    efficiency_df = efficiency_df.sort_values('efficiency_gain', ascending=False)
+    
+    # Create bar chart
+    bars = plt.bar(efficiency_df['model'], efficiency_df['efficiency_gain'])
+    
+    # Color bars based on efficiency (green for positive, red for negative)
+    for i, bar in enumerate(bars):
+        bar.set_color('green' if efficiency_df.iloc[i]['is_chinese_more_efficient'] else 'red')
+    
+    # Add labels and title
+    plt.xlabel('Model')
+    plt.ylabel('Chinese Efficiency Gain vs. English (%)')
+    plt.title('Chinese Reasoning Efficiency by Model')
+    plt.xticks(rotation=45)
+    
+    # Add value labels on bars
+    for i, v in enumerate(efficiency_df['efficiency_gain']):
+        plt.text(i, v + (1 if v >= 0 else -3), f"{v:.1f}%", 
+                 ha='center', va='bottom' if v >= 0 else 'top')
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/chinese_efficiency_by_model.png')
+    plt.close()
+    
+    # 3. Model efficiency heatmap by benchmark
+    plt.figure(figsize=(16, 12))
+    
+    # Get benchmarks
+    benchmarks = df['benchmark'].unique()
+    
+    # Create a DataFrame to store efficiency values
+    heatmap_data = pd.DataFrame(index=benchmarks, columns=models)
+    
+    # Calculate efficiency for each model and benchmark
+    for benchmark in benchmarks:
+        benchmark_df = df[df['benchmark'] == benchmark]
+        
+        for model in models:
+            model_df = benchmark_df[benchmark_df['model'] == model]
+            
+            english_df = model_df[model_df['prompt_type'] == 'english']
+            chinese_df = model_df[model_df['prompt_type'] == 'chinese']
+            
+            if english_df.empty or chinese_df.empty:
+                heatmap_data.loc[benchmark, model] = np.nan
+                continue
+                
+            english_tokens = english_df['total_tokens'].mean()
+            chinese_tokens = chinese_df['total_tokens'].mean()
+            
+            efficiency_gain = ((english_tokens - chinese_tokens) / english_tokens) * 100 if english_tokens > 0 else 0
+            heatmap_data.loc[benchmark, model] = efficiency_gain
+    
+    # Create a custom colormap (green for better efficiency, red for worse)
+    cmap = LinearSegmentedColormap.from_list('efficiency_cmap', ['#ff9999', '#ffffff', '#99ff99'], N=100)
+    
+    # Create heatmap
+    sns.heatmap(heatmap_data, annot=True, cmap=cmap, center=0, fmt='.1f', linewidths=.5)
+    
+    # Add labels and title
+    plt.xlabel('Model')
+    plt.ylabel('Benchmark')
+    plt.title('Chinese Efficiency Gain (%) by Model and Benchmark')
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/model_benchmark_efficiency_heatmap.png')
+    plt.close()
+    
+    # 4. Model comparison radar chart
+    plt.figure(figsize=(14, 12))
+    
+    # Metrics to include in radar chart
+    metrics = [
+        'chinese_efficiency',  # Chinese vs English efficiency
+        'token_reduction',     # Overall token reduction
+        'response_time',       # Response time
+        'bits_per_token',      # Information density
+        'chars_per_token'      # Character efficiency
+    ]
+    
+    # Calculate metrics for each model
+    radar_data = {}
+    
+    for model in models:
+        model_df = df[df['model'] == model]
+        
+        # Calculate Chinese efficiency
+        english_df = model_df[model_df['prompt_type'] == 'english']
+        chinese_df = model_df[model_df['prompt_type'] == 'chinese']
+        
+        if english_df.empty or chinese_df.empty:
+            continue
+            
+        english_tokens = english_df['total_tokens'].mean()
+        chinese_tokens = chinese_df['total_tokens'].mean()
+        
+        chinese_efficiency = (english_tokens - chinese_tokens) / english_tokens if english_tokens > 0 else 0
+        
+        # Calculate overall token reduction (average across all languages)
+        avg_tokens = model_df['total_tokens'].mean()
+        token_reduction = 1 - (avg_tokens / english_tokens) if english_tokens > 0 else 0
+        
+        # Calculate response time
+        response_time = model_df['response_time'].mean() if 'response_time' in model_df.columns else 0
+        
+        # Calculate bits per token
+        bits_per_token = model_df['response_bits_per_token'].mean() if 'response_bits_per_token' in model_df.columns else 0
+        
+        # Calculate chars per token
+        chars_per_token = model_df['response_chars_per_token'].mean() if 'response_chars_per_token' in model_df.columns else 0
+        
+        # Store metrics
+        radar_data[model] = {
+            'chinese_efficiency': chinese_efficiency,
+            'token_reduction': token_reduction,
+            'response_time': response_time,
+            'bits_per_token': bits_per_token,
+            'chars_per_token': chars_per_token
+        }
+    
+    # Normalize metrics for radar chart
+    normalized_data = {}
+    
+    for metric in metrics:
+        max_val = max([data[metric] for data in radar_data.values()])
+        min_val = min([data[metric] for data in radar_data.values()])
+        
+        for model in radar_data:
+            if model not in normalized_data:
+                normalized_data[model] = {}
+            
+            # Normalize to 0-1 range
+            if max_val > min_val:
+                if metric == 'response_time':
+                    # For response time, lower is better, so invert the normalization
+                    normalized_data[model][metric] = 1 - ((radar_data[model][metric] - min_val) / (max_val - min_val))
+                else:
+                    normalized_data[model][metric] = (radar_data[model][metric] - min_val) / (max_val - min_val)
+            else:
+                normalized_data[model][metric] = 0.5
+    
+    # Create radar chart
+    # Number of metrics
+    N = len(metrics)
+    
+    # Create a figure
+    fig = plt.figure(figsize=(12, 10))
+    
+    # Create a radar chart
+    ax = fig.add_subplot(111, polar=True)
+    
+    # Set the angles for each metric
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]  # Close the loop
+    
+    # Set the labels for each metric
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels([m.replace('_', ' ').title() for m in metrics])
+    
+    # Draw the radar chart for each model
+    colors = sns.color_palette("viridis", len(normalized_data))
+    
+    for i, (model, metrics_dict) in enumerate(normalized_data.items()):
+        values = [metrics_dict[metric] for metric in metrics]
+        values += values[:1]  # Close the loop
+        
+        ax.plot(angles, values, linewidth=2, linestyle='solid', label=model, color=colors[i])
+        ax.fill(angles, values, alpha=0.1, color=colors[i])
+    
+    # Add legend
+    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+    
+    plt.title('Model Performance Comparison', size=15)
+    plt.tight_layout()
+    
+    plt.savefig(f'{output_dir}/model_comparison_radar.png')
+    plt.close()
+    
+    # 5. Deepseek vs. Anthropic bar chart
+    plt.figure(figsize=(14, 8))
+    
+    # Group models by provider
+    deepseek_models = [model for model in models if 'deepseek' in model.lower()]
+    anthropic_models = [model for model in models if 'anthropic' in model.lower() or 'claude' in model.lower()]
+    
+    if not deepseek_models or not anthropic_models:
+        print("Cannot create Deepseek vs. Anthropic comparison: missing models from one or both providers.")
+    else:
+        # Calculate average efficiency for each provider
+        provider_efficiency = []
+        
+        # Deepseek average
+        deepseek_df = df[df['model'].isin(deepseek_models)]
+        deepseek_english = deepseek_df[deepseek_df['prompt_type'] == 'english']['total_tokens'].mean()
+        deepseek_chinese = deepseek_df[deepseek_df['prompt_type'] == 'chinese']['total_tokens'].mean()
+        deepseek_gain = ((deepseek_english - deepseek_chinese) / deepseek_english) * 100 if deepseek_english > 0 else 0
+        
+        # Anthropic average
+        anthropic_df = df[df['model'].isin(anthropic_models)]
+        anthropic_english = anthropic_df[anthropic_df['prompt_type'] == 'english']['total_tokens'].mean()
+        anthropic_chinese = anthropic_df[anthropic_df['prompt_type'] == 'chinese']['total_tokens'].mean()
+        anthropic_gain = ((anthropic_english - anthropic_chinese) / anthropic_english) * 100 if anthropic_english > 0 else 0
+        
+        provider_efficiency = [
+            {'provider': 'Deepseek', 'efficiency_gain': deepseek_gain},
+            {'provider': 'Anthropic', 'efficiency_gain': anthropic_gain}
+        ]
+        
+        # Create DataFrame
+        provider_df = pd.DataFrame(provider_efficiency)
+        
+        # Create bar chart
+        bars = plt.bar(provider_df['provider'], provider_df['efficiency_gain'])
+        
+        # Color bars based on efficiency (green for positive, red for negative)
+        for i, bar in enumerate(bars):
+            bar.set_color('green' if provider_df.iloc[i]['efficiency_gain'] > 0 else 'red')
+        
+        # Add labels and title
+        plt.xlabel('Provider')
+        plt.ylabel('Chinese Efficiency Gain vs. English (%)')
+        plt.title('Chinese Reasoning Efficiency by Provider')
+        
+        # Add value labels on bars
+        for i, v in enumerate(provider_df['efficiency_gain']):
+            plt.text(i, v + (1 if v >= 0 else -3), f"{v:.1f}%", 
+                     ha='center', va='bottom' if v >= 0 else 'top')
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/provider_comparison.png')
+        plt.close()
+    
+    return {
+        'model_lang_data': model_lang_data,
+        'efficiency_df': efficiency_df,
+        'heatmap_data': heatmap_data,
+        'radar_data': radar_data
+    }
+
 def create_all_multilingual_visualizations(df, output_dir="reports/visualizations/multilingual"):
     """
     Create all multilingual visualizations.
@@ -431,6 +742,9 @@ def create_all_multilingual_visualizations(df, output_dir="reports/visualization
     efficiency_df = create_language_efficiency_by_difficulty_chart(df, output_dir)
     clei_df = create_combined_language_efficiency_index(df, output_dir)
     
+    # Create model comparison visualizations
+    model_comparison_data = create_model_comparison_visualizations(df, f"{output_dir}/model_comparison")
+    
     print(f"All multilingual visualizations created and saved to {output_dir}")
     
     return {
@@ -439,5 +753,6 @@ def create_all_multilingual_visualizations(df, output_dir="reports/visualization
         'radar_data': radar_data,
         'heatmap_data': heatmap_data,
         'efficiency_df': efficiency_df,
-        'clei_df': clei_df
+        'clei_df': clei_df,
+        'model_comparison_data': model_comparison_data
     }
