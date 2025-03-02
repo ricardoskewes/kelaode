@@ -1,5 +1,5 @@
-### Measure the information density in chinese
+### Measure the information density in Chinese
 
-### metrics:   
-- compression ratio   
-- entropy   
+### Metrics:   
+- Compression ratio   
+- Entropy   
