@@ -29,12 +29,8 @@ def run_multilingual_experiments(repetitions=3, output_file="experiment_results/
     else:
         print("ANTHROPIC_API_KEY not set. Skipping Anthropic models.")
     
-    # Add Deepseek models if API key is available
-    if os.environ.get("DEEPSEEK_API_KEY"):
-        models.append("deepseek:deepseek-chat")
-        models.append("deepseek:deepseek-coder")
-    else:
-        print("DEEPSEEK_API_KEY not set. Skipping Deepseek models.")
+    # Skip Deepseek models due to insufficient balance
+    print("Skipping Deepseek models due to insufficient balance.")
     
     if not models:
         print("No API keys available. Cannot run experiments.")
