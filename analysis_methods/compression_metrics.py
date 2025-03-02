@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import re
 from collections import Counter
+from scipy.stats import entropy
 
 def calculate_compression_ratio(english_text, chinese_text, english_tokens, chinese_tokens):
     """
@@ -192,3 +193,164 @@ def calculate_normalized_compression_metrics(results_df):
             compression_metrics.append(metrics)
     
     return pd.DataFrame(compression_metrics)
+
+def calculate_language_compression_index(results_df):
+    """
+    Calculate a comprehensive Language Compression Index (LCI) for multiple languages.
+    The LCI quantifies how efficiently each language encodes information in tokens
+    compared to English, accounting for token usage, character count, and information content.
+    
+    Args:
+        results_df: DataFrame containing experiment results
+        
+    Returns:
+        DataFrame with Language Compression Index for each language
+    """
+    # Create a copy of the DataFrame to avoid modifying the original
+    df = results_df.copy()
+    
+    # Get unique languages (prompt types)
+    languages = df['prompt_type'].unique()
+    
+    # Get English data as baseline
+    english_df = df[df['prompt_type'] == 'english']
+    if english_df.empty:
+        raise ValueError("No English data found for baseline comparison")
+    
+    english_tokens_mean = english_df['total_tokens'].mean()
+    english_bits_per_token = english_df['response_bits_per_token'].mean() if 'response_bits_per_token' in english_df.columns else 0
+    english_chars_per_token = english_df['response_chars_per_token'].mean() if 'response_chars_per_token' in english_df.columns else 0
+    
+    # Calculate Language Compression Index for each language
+    lci_data = []
+    
+    for lang in languages:
+        # Skip English as it's the baseline
+        if lang == 'english':
+            continue
+        
+        lang_df = df[df['prompt_type'] == lang]
+        if lang_df.empty:
+            continue
+        
+        # Calculate metrics
+        lang_tokens_mean = lang_df['total_tokens'].mean()
+        lang_bits_per_token = lang_df['response_bits_per_token'].mean() if 'response_bits_per_token' in lang_df.columns else 0
+        lang_chars_per_token = lang_df['response_chars_per_token'].mean() if 'response_chars_per_token' in lang_df.columns else 0
+        
+        # Calculate token efficiency (ratio of English tokens to language tokens)
+        # Higher values mean the language is more token-efficient
+        token_efficiency = english_tokens_mean / lang_tokens_mean if lang_tokens_mean > 0 else 0
+        
+        # Calculate information density ratio (bits per token relative to English)
+        # Higher values mean the language encodes more information per token
+        info_density_ratio = lang_bits_per_token / english_bits_per_token if english_bits_per_token > 0 else 0
+        
+        # Calculate character efficiency (characters per token relative to English)
+        # Higher values mean the language uses more characters per token
+        char_efficiency = lang_chars_per_token / english_chars_per_token if english_chars_per_token > 0 else 0
+        
+        # Calculate Language Compression Index
+        # LCI = (token_efficiency * 0.6) + (info_density_ratio * 0.3) + (char_efficiency * 0.1)
+        # Weights prioritize token efficiency while accounting for information density and character usage
+        lci = (token_efficiency * 0.6) + (info_density_ratio * 0.3) + (char_efficiency * 0.1)
+        
+        # Calculate token reduction percentage
+        token_reduction = ((english_tokens_mean - lang_tokens_mean) / english_tokens_mean) * 100 if english_tokens_mean > 0 else 0
+        
+        # Store results
+        lci_data.append({
+            'language': lang,
+            'lci': lci,
+            'token_efficiency': token_efficiency,
+            'info_density_ratio': info_density_ratio,
+            'char_efficiency': char_efficiency,
+            'token_reduction_percent': token_reduction,
+            'english_tokens_mean': english_tokens_mean,
+            'lang_tokens_mean': lang_tokens_mean
+        })
+    
+    # Create DataFrame and sort by LCI
+    lci_df = pd.DataFrame(lci_data).sort_values('lci', ascending=False)
+    
+    return lci_df
+
+def calculate_multilingual_compression_metrics(results_df):
+    """
+    Calculate compression metrics for multiple languages compared to English.
+    
+    Args:
+        results_df: DataFrame containing experiment results
+        
+    Returns:
+        DataFrame with compression metrics for each language
+    """
+    # Create a copy of the DataFrame to avoid modifying the original
+    df = results_df.copy()
+    
+    # Get unique languages (prompt types)
+    languages = df['prompt_type'].unique()
+    
+    # Get English data as baseline
+    english_df = df[df['prompt_type'] == 'english']
+    if english_df.empty:
+        raise ValueError("No English data found for baseline comparison")
+    
+    # Calculate compression metrics for each language
+    compression_metrics = []
+    
+    for lang in languages:
+        # Skip English as it's the baseline
+        if lang == 'english':
+            continue
+        
+        lang_df = df[df['prompt_type'] == lang]
+        if lang_df.empty:
+            continue
+        
+        # Group by benchmark to calculate benchmark-specific metrics
+        benchmarks = df['benchmark'].unique()
+        benchmark_metrics = {}
+        
+        for benchmark in benchmarks:
+            english_benchmark = english_df[english_df['benchmark'] == benchmark]
+            lang_benchmark = lang_df[lang_df['benchmark'] == benchmark]
+            
+            if english_benchmark.empty or lang_benchmark.empty:
+                continue
+            
+            english_tokens = english_benchmark['total_tokens'].mean()
+            lang_tokens = lang_benchmark['total_tokens'].mean()
+            
+            # Calculate efficiency gain for this benchmark
+            efficiency_gain = ((english_tokens - lang_tokens) / english_tokens) * 100 if english_tokens > 0 else 0
+            
+            benchmark_metrics[benchmark] = {
+                'english_tokens': english_tokens,
+                'lang_tokens': lang_tokens,
+                'efficiency_gain': efficiency_gain
+            }
+        
+        # Calculate overall metrics
+        english_tokens_mean = english_df['total_tokens'].mean()
+        lang_tokens_mean = lang_df['total_tokens'].mean()
+        
+        # Calculate token reduction percentage
+        token_reduction = ((english_tokens_mean - lang_tokens_mean) / english_tokens_mean) * 100 if english_tokens_mean > 0 else 0
+        
+        # Calculate compression ratio
+        compression_ratio = english_tokens_mean / lang_tokens_mean if lang_tokens_mean > 0 else 0
+        
+        # Store results
+        metrics = {
+            'language': lang,
+            'english_tokens_mean': english_tokens_mean,
+            'lang_tokens_mean': lang_tokens_mean,
+            'token_reduction_percent': token_reduction,
+            'compression_ratio': compression_ratio,
+            'benchmark_metrics': benchmark_metrics
+        }
+        
+        compression_metrics.append(metrics)
+    
+    return compression_metrics

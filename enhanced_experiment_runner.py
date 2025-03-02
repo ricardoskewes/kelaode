@@ -416,6 +416,7 @@ This approach leverages the unique efficiency of different languages for differe
                 total_tokens = response.usage.total_tokens
             
             elif provider == "deepseek":
+<<<<<<< HEAD
                 # Use deepseek for Deepseek models
                 try:
                     response = self.clients[provider].chat_completion(
@@ -437,6 +438,42 @@ This approach leverages the unique efficiency of different languages for differe
                         raise ValueError(f"Deepseek API error: Insufficient Balance")
                     else:
                         raise
+||||||| 46db262
+                # Use deepseek-ai for Deepseek models
+                response = self.clients[provider].chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "user", "content": full_prompt}
+                    ],
+                    max_tokens=4000
+                )
+                
+                response_text = response.choices[0].message.content
+                # Deepseek API provides token counts
+                input_tokens = response.usage.prompt_tokens
+                output_tokens = response.usage.completion_tokens
+                total_tokens = response.usage.total_tokens
+=======
+                # Use deepseek for Deepseek models
+                response = self.clients[provider].chat_completion(
+                    prompt=full_prompt,
+                    prompt_sys="You are a helpful assistant",
+                    model=model_name,
+                    max_tokens=4000
+                )
+                
+                response_text = response
+                # Deepseek API doesn't provide token counts directly, estimate them
+                # This is a rough estimate based on character count
+                char_count = len(full_prompt)
+                response_char_count = len(response_text)
+                
+                # Estimate tokens based on average characters per token
+                # (approximately 4 characters per token for English)
+                input_tokens = char_count // 4
+                output_tokens = response_char_count // 4
+                total_tokens = input_tokens + output_tokens
+>>>>>>> 536290cfbb91ce6e24a0c7056f9c775b67af2a12
             
             else:
                 raise ValueError(f"Unsupported provider: {provider}")
@@ -1002,6 +1039,23 @@ This approach leverages the unique efficiency of different languages for differe
         plt.xticks(rotation=45)
         plt.tight_layout()
         plt.savefig('reports/visualizations/token_usage_by_benchmark.png')
+        
+        # Close all figures to free memory
+        plt.close('all')
+        
+        # Import enhanced multilingual visualization methods
+        try:
+            from multilingual_visualizations import create_all_multilingual_visualizations
+            
+            # Create enhanced multilingual visualizations
+            print("Creating enhanced multilingual visualizations...")
+            create_all_multilingual_visualizations(df)
+            
+        except ImportError as e:
+            print(f"Warning: Could not import multilingual visualization module: {str(e)}")
+            print("Basic visualizations created, but enhanced multilingual visualizations skipped.")
+        except Exception as e:
+            print(f"Error creating enhanced multilingual visualizations: {str(e)}")
 
 def main():
     """
@@ -1319,12 +1373,16 @@ def test_deepseek_connection():
         return False
     
     try:
+        # Import the DeepSeekAPI class
+        from deepseek import DeepSeekAPI
+        
         # Initialize the Deepseek client
         client = DeepSeekAPI(api_key=os.environ.get("DEEPSEEK_API_KEY"))
         
         # Test a simple query
         start_time = time.time()
         
+<<<<<<< HEAD
         try:
             response = client.chat_completion(
                 model="deepseek-chat",
@@ -1339,19 +1397,27 @@ def test_deepseek_connection():
                 return False
             else:
                 raise  # Re-raise other exceptions
+||||||| 46db262
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "user", "content": "Hello, can you respond in Chinese?"}
+            ]
+        )
+=======
+        response = client.chat_completion(
+            prompt="Hello, can you respond in Chinese?",
+            prompt_sys="You are a helpful assistant",
+            model="deepseek-chat"
+        )
+>>>>>>> 536290cfbb91ce6e24a0c7056f9c775b67af2a12
         
         end_time = time.time()
         
         # Print the response
         print("Deepseek API connection successful!")
-        print(f"Response: {response.choices[0].message.content}")
+        print(f"Response: {response}")
         print(f"Response time: {end_time - start_time:.2f} seconds")
-        
-        # Try to get token usage if available
-        if hasattr(response, 'usage'):
-            print(f"Input tokens: {response.usage.prompt_tokens}")
-            print(f"Output tokens: {response.usage.completion_tokens}")
-            print(f"Total tokens: {response.usage.total_tokens}")
         
         return True
     except Exception as e:

@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "benchmark": {
+      "MATH": "japanese"
+    },
+    "category": {
+      "algebra": "chinese",
+      "calculus": "chinese",
+      "geometry": "japanese",
+      "probability": "chinese"
+    },
+    "difficulty": {
+      "medium": "chinese",
+      "hard": "japanese"
+    }
+  }
+}
