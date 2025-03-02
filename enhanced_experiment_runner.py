@@ -11,7 +11,7 @@ import anthropic
 import matplotlib.pyplot as plt
 from datetime import datetime
 from dashscope import Generation as QwenGeneration
-from deepseek_ai import chat as DeepseekChat
+from deepseek import DeepSeekAPI
 
 # Import enhanced benchmarks
 from enhanced_benchmarks import ENHANCED_BENCHMARK_PROBLEMS
@@ -65,8 +65,8 @@ class EnhancedLanguageEfficiencyTest:
             
         # Initialize Deepseek client
         if os.environ.get("DEEPSEEK_API_KEY"):
-            self.clients["deepseek"] = DeepseekChat.Chat(
-                api_key=os.environ.get("DEEPSEEK_API_KEY"),
+            self.clients["deepseek"] = DeepSeekAPI(
+                api_key=os.environ.get("DEEPSEEK_API_KEY")
             )
         
         # Default prompts if none provided
@@ -416,20 +416,25 @@ This approach leverages the unique efficiency of different languages for differe
                 total_tokens = response.usage.total_tokens
             
             elif provider == "deepseek":
-                # Use deepseek-ai for Deepseek models
-                response = self.clients[provider].chat.completions.create(
+                # Use deepseek for Deepseek models
+                response = self.clients[provider].chat_completion(
+                    prompt=full_prompt,
+                    prompt_sys="You are a helpful assistant",
                     model=model_name,
-                    messages=[
-                        {"role": "user", "content": full_prompt}
-                    ],
                     max_tokens=4000
                 )
                 
-                response_text = response.choices[0].message.content
-                # Deepseek API provides token counts
-                input_tokens = response.usage.prompt_tokens
-                output_tokens = response.usage.completion_tokens
-                total_tokens = response.usage.total_tokens
+                response_text = response
+                # Deepseek API doesn't provide token counts directly, estimate them
+                # This is a rough estimate based on character count
+                char_count = len(full_prompt)
+                response_char_count = len(response_text)
+                
+                # Estimate tokens based on average characters per token
+                # (approximately 4 characters per token for English)
+                input_tokens = char_count // 4
+                output_tokens = response_char_count // 4
+                total_tokens = input_tokens + output_tokens
             
             else:
                 raise ValueError(f"Unsupported provider: {provider}")
