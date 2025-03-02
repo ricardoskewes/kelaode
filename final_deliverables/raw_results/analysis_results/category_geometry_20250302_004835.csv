@@ -1,0 +1,10 @@
+prompt_type,mean,std,count,token_reduction,efficiency_percent,more_efficient_than_english
+arabic,533.0,,1,94.0,14.992025518341306,True
+chinese,572.0,,1,55.0,8.771929824561402,True
+english,627.0,,1,0.0,0.0,False
+finnish,539.0,,1,88.0,14.035087719298245,True
+german,613.0,,1,14.0,2.2328548644338118,True
+japanese,486.0,,1,141.0,22.48803827751196,True
+korean,631.0,,1,-4.0,-0.6379585326953748,False
+russian,629.0,,1,-2.0,-0.3189792663476874,False
+strategic,584.0,,1,43.0,6.8580542264752795,True

@@ -1,0 +1,311 @@
+{
+  "aggregated_by_prompt_model": {
+    "chinese": {
+      "claude-3-5-sonnet-20240620": {
+        "input_tokens": {
+          "mean": 167.6,
+          "std": 24.93190726759587,
+          "median": 178.0,
+          "count": 10
+        },
+        "output_tokens": {
+          "mean": 355.5,
+          "std": 68.2629719052235,
+          "median": 332.5,
+          "count": 10
+        },
+        "total_tokens": {
+          "mean": 523.1,
+          "std": 79.0646008723949,
+          "median": 483.0,
+          "count": 10
+        },
+        "response_time": {
+          "mean": 4.964917445182801,
+          "std": 0.9383651938170222,
+          "median": 4.713605046272278,
+          "count": 10
+        },
+        "response_bits_per_token": {
+          "mean": 7.089881229434771,
+          "std": 1.032218114283682,
+          "median": 6.767392828894167,
+          "count": 10
+        },
+        "response_chinese_ratio": {
+          "mean": 0.47542085213437507,
+          "std": 0.163796661609646,
+          "median": 0.4876243781094527,
+          "count": 10
+        },
+        "response_compression_ratio": {
+          "mean": 0.5948320907613172,
+          "std": 0.08628675948032967,
+          "median": 0.5775621717159145,
+          "count": 10
+        },
+        "response_chinese_chars_per_token": {
+          "mean": 0.5359411713292104,
+          "std": 0.11274097188754079,
+          "median": 0.5373716012084593,
+          "count": 10
+        }
+      }
+    },
+    "english": {
+      "claude-3-5-sonnet-20240620": {
+        "input_tokens": {
+          "mean": 100.6,
+          "std": 24.93190726759587,
+          "median": 111.0,
+          "count": 10
+        },
+        "output_tokens": {
+          "mean": 437.0,
+          "std": 151.45443025690747,
+          "median": 374.5,
+          "count": 10
+        },
+        "total_tokens": {
+          "mean": 537.6,
+          "std": 150.28284444118475,
+          "median": 487.0,
+          "count": 10
+        },
+        "response_time": {
+          "mean": 6.106729650497437,
+          "std": 2.05493752164227,
+          "median": 5.22782039642334,
+          "count": 10
+        },
+        "response_bits_per_token": {
+          "mean": 15.556590164961046,
+          "std": 2.8964957277639476,
+          "median": 16.01072257290705,
+          "count": 10
+        },
+        "response_chinese_ratio": {
+          "mean": 0.0,
+          "std": 0.0,
+          "median": 0.0,
+          "count": 10
+        },
+        "response_compression_ratio": {
+          "mean": 1.0,
+          "std": 0.0,
+          "median": 1.0,
+          "count": 10
+        },
+        "response_chinese_chars_per_token": {
+          "mean": 0.0,
+          "std": 0.0,
+          "median": 0.0,
+          "count": 10
+        }
+      }
+    }
+  },
+  "cross_validation_results": {
+    "mean_rmse": 91.2532913777546,
+    "std_rmse": 21.417222330308377,
+    "cv_scores": [
+      60.09270759931068,
+      105.52480461648832,
+      70.77104548483806,
+      109.23221505378139,
+      110.64568413435458
+    ],
+    "n_splits": 5
+  },
+  "statistical_significance": {
+    "english_vs_chinese": {
+      "t_statistic": 0.2700221594221129,
+      "p_value": 0.7911891734985921,
+      "significant_at_0.05": false,
+      "significant_at_0.01": false,
+      "mean_difference": 14.5,
+      "percent_difference": 2.6971726190476186
+    }
+  },
+  "difficulty_validation": {
+    "medium": {
+      "metrics_by_prompt_type": {
+        "english": {
+          "mean_tokens": 565.75,
+          "std_tokens": 186.1744253829367,
+          "sample_size": 4
+        },
+        "chinese": {
+          "mean_tokens": 494.5,
+          "std_tokens": 41.829017041602434,
+          "sample_size": 4
+        }
+      },
+      "differences": {
+        "english_vs_chinese": {
+          "absolute_difference": 71.25,
+          "percent_difference": 12.593901900132568,
+          "is_type1_more_efficient": false,
+          "is_type2_more_efficient": true
+        }
+      }
+    },
+    "hard": {
+      "metrics_by_prompt_type": {
+        "english": {
+          "mean_tokens": 518.8333333333334,
+          "std_tokens": 137.11224112626365,
+          "sample_size": 6
+        },
+        "chinese": {
+          "mean_tokens": 542.1666666666666,
+          "std_tokens": 95.45557430902957,
+          "sample_size": 6
+        }
+      },
+      "differences": {
+        "english_vs_chinese": {
+          "absolute_difference": -23.333333333333258,
+          "percent_difference": -4.4972695149373445,
+          "is_type1_more_efficient": true,
+          "is_type2_more_efficient": false
+        }
+      }
+    }
+  },
+  "token_usage_analysis": {
+    "grouped_data": [
+      {
+        "difficulty": "hard",
+        "prompt_type": "chinese",
+        "total_tokens_mean": 542.1666666666666,
+        "total_tokens_std": 95.45557430902959,
+        "total_tokens_count": 6,
+        "input_tokens_mean": 186.0,
+        "output_tokens_mean": 356.1666666666667
+      },
+      {
+        "difficulty": "hard",
+        "prompt_type": "english",
+        "total_tokens_mean": 518.8333333333334,
+        "total_tokens_std": 137.11224112626365,
+        "total_tokens_count": 6,
+        "input_tokens_mean": 119.0,
+        "output_tokens_mean": 399.8333333333333
+      },
+      {
+        "difficulty": "medium",
+        "prompt_type": "chinese",
+        "total_tokens_mean": 494.5,
+        "total_tokens_std": 41.829017041602434,
+        "total_tokens_count": 4,
+        "input_tokens_mean": 140.0,
+        "output_tokens_mean": 354.5
+      },
+      {
+        "difficulty": "medium",
+        "prompt_type": "english",
+        "total_tokens_mean": 565.75,
+        "total_tokens_std": 186.1744253829367,
+        "total_tokens_count": 4,
+        "input_tokens_mean": 73.0,
+        "output_tokens_mean": 492.75
+      }
+    ],
+    "efficiency_by_difficulty": {
+      "medium": {
+        "prompt_data": {
+          "english": {
+            "mean_tokens": 565.75,
+            "std_tokens": 186.1744253829367,
+            "sample_size": 4,
+            "input_tokens": 73.0,
+            "output_tokens": 492.75
+          },
+          "chinese": {
+            "mean_tokens": 494.5,
+            "std_tokens": 41.829017041602434,
+            "sample_size": 4,
+            "input_tokens": 140.0,
+            "output_tokens": 354.5
+          }
+        },
+        "comparisons": {
+          "english_vs_chinese": {
+            "absolute_difference": 71.25,
+            "percent_difference": 12.593901900132568,
+            "chinese_more_efficient": true,
+            "efficiency_gain": 12.593901900132568
+          }
+        }
+      },
+      "hard": {
+        "prompt_data": {
+          "english": {
+            "mean_tokens": 518.8333333333334,
+            "std_tokens": 137.11224112626365,
+            "sample_size": 6,
+            "input_tokens": 119.0,
+            "output_tokens": 399.8333333333333
+          },
+          "chinese": {
+            "mean_tokens": 542.1666666666666,
+            "std_tokens": 95.45557430902959,
+            "sample_size": 6,
+            "input_tokens": 186.0,
+            "output_tokens": 356.1666666666667
+          }
+        },
+        "comparisons": {
+          "english_vs_chinese": {
+            "absolute_difference": -23.333333333333258,
+            "percent_difference": -4.4972695149373445,
+            "chinese_more_efficient": false,
+            "efficiency_gain": 4.4972695149373445
+          }
+        }
+      }
+    }
+  },
+  "compression_metrics": [
+    {
+      "problem_id": "arc_science_1",
+      "raw_compression_ratio": 1.028009084027252,
+      "normalized_compression_ratio": 1.028009084027252,
+      "efficiency_gain_percent": 2.72459499263623
+    },
+    {
+      "problem_id": "bbh_logical_deduction_1",
+      "raw_compression_ratio": 0.8849840255591054,
+      "normalized_compression_ratio": 0.8849840255591056,
+      "efficiency_gain_percent": -12.996389891696749
+    },
+    {
+      "problem_id": "gsm8k_complex_1",
+      "raw_compression_ratio": 0.9305135951661632,
+      "normalized_compression_ratio": 0.9305135951661633,
+      "efficiency_gain_percent": -7.467532467532467
+    },
+    {
+      "problem_id": "hotpotqa_1",
+      "raw_compression_ratio": 0.8574445617740233,
+      "normalized_compression_ratio": 0.8574445617740232,
+      "efficiency_gain_percent": -16.625615763546797
+    },
+    {
+      "problem_id": "math_algebra_1",
+      "raw_compression_ratio": 1.4073714839961202,
+      "normalized_compression_ratio": 1.4073714839961202,
+      "efficiency_gain_percent": 28.945554789800138
+    }
+  ],
+  "prompt_type_comparisons": {
+    "english_vs_chinese": {
+      "english_avg_tokens": 537.6,
+      "chinese_avg_tokens": 523.1,
+      "absolute_difference": 14.5,
+      "token_reduction_percent": 2.6971726190476186,
+      "is_chinese_more_efficient": true
+    }
+  }
+}

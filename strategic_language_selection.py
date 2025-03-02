@@ -338,6 +338,8 @@ class StrategicLanguageSelector:
             benchmark = 'ARC-Challenge'
         elif any(kw in problem_lower for kw in ['story', 'narrative', 'passage']):
             benchmark = 'HotpotQA'
+        elif any(kw in problem_lower for kw in ['context', 'long text', 'article']):
+            benchmark = 'LongContextQA'
         
         # Detect category
         category = 'unknown'
@@ -349,6 +351,12 @@ class StrategicLanguageSelector:
             category = 'probability'
         elif any(kw in problem_lower for kw in ['calculus', 'derivative', 'integral']):
             category = 'calculus'
+        elif any(kw in problem_lower for kw in ['history', 'historical', 'past events']):
+            category = 'historical'
+        elif any(kw in problem_lower for kw in ['science', 'scientific', 'experiment']):
+            category = 'scientific'
+        elif any(kw in problem_lower for kw in ['economics', 'financial', 'economy']):
+            category = 'economic'
         
         # Detect difficulty
         difficulty = 'medium'
@@ -358,10 +366,14 @@ class StrategicLanguageSelector:
         elif word_count < 50 and not any(kw in problem_lower for kw in ['prove', 'explain', 'why']):
             difficulty = 'easy'
         
+        # Estimate context length
+        context_length = len(problem_text)
+        
         return {
             'benchmark': benchmark,
             'category': category,
-            'difficulty': difficulty
+            'difficulty': difficulty,
+            'context_length': context_length
         }
 
 def train_strategic_language_selector():
@@ -393,6 +405,65 @@ def train_strategic_language_selector():
     
     return selector
 
+def select_language_for_problem(problem, context_length=None):
+    """
+    Select the most efficient language for a given problem based on its characteristics.
+    
+    Args:
+        problem: Dictionary with problem characteristics (benchmark, category, difficulty)
+        context_length: Optional context length for long-context problems
+        
+    Returns:
+        The selected language
+    """
+    # Extract problem characteristics
+    benchmark = problem.get('benchmark', 'unknown')
+    category = problem.get('category', 'unknown')
+    difficulty = problem.get('difficulty', 'medium')
+    
+    # Consider context length if provided
+    if context_length is not None:
+        # For very long contexts (10K+ chars), prefer languages with high compression
+        if context_length > 10000:
+            if category == "mathematical" or benchmark == "MATH":
+                return "chinese"
+            elif category == "logical" or benchmark == "BBH":
+                return "german"
+            elif category == "scientific" or benchmark == "ARC-Challenge":
+                return "russian"
+            else:
+                return "english"
+        # For medium-long contexts (5K-10K chars), use domain-specific selection
+        elif context_length > 5000:
+            if category == "mathematical" or benchmark == "MATH":
+                return "chinese"
+            elif category == "logical" or benchmark == "BBH":
+                return "german"
+            elif category == "scientific" or benchmark == "ARC-Challenge":
+                return "russian"
+            elif category == "historical":
+                return "chinese"
+            elif category == "economic":
+                return "german"
+            else:
+                return "english"
+    
+    # For regular problems, use the existing selection logic
+    if benchmark == "MATH" or category == "mathematical":
+        return "chinese"
+    elif benchmark == "BBH" or category == "logical":
+        return "german"
+    elif benchmark == "ARC-Challenge" or category == "scientific":
+        return "russian"
+    elif benchmark == "HotpotQA" or category == "reading_comprehension":
+        return "english"
+    elif difficulty == "hard":
+        return "english"
+    elif difficulty == "medium":
+        return "chinese"
+    else:
+        return "english"
+
 def select_most_efficient_language(problem_text, method='hybrid'):
     """
     Select the most efficient language for a given problem.
@@ -415,8 +486,15 @@ def select_most_efficient_language(problem_text, method='hybrid'):
     # Analyze problem
     problem_characteristics = selector.analyze_problem(problem_text)
     
-    # Select language
-    language = selector.select_language(problem_characteristics, method)
+    # Get context length if available
+    context_length = problem_characteristics.get('context_length')
+    
+    # Use context-aware selection if context length is significant
+    if context_length and context_length > 5000:
+        language = select_language_for_problem(problem_characteristics, context_length)
+    else:
+        # Select language using the specified method
+        language = selector.select_language(problem_characteristics, method)
     
     return language, problem_characteristics
 

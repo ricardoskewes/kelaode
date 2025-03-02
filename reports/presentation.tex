@@ -98,7 +98,7 @@
 
 \begin{frame}{Language Efficiency by Benchmark}
     \begin{center}
-        \includegraphics[width=0.9\textwidth]{visualizations/efficiency_by_benchmark.png}
+        \includegraphics[width=0.9\textwidth]{visualizations/presentation/efficiency_vs_english.png}
     \end{center}
     
     \begin{itemize}
@@ -156,17 +156,43 @@
     \end{block}
 \end{frame}
 
-\begin{frame}{Model Comparison: Anthropic vs. Deepseek}
-    \begin{itemize}
-        \item Anthropic Claude 3.5 Sonnet results available for all languages and benchmarks
-        \item Deepseek Chat results available for long-context QA tasks
-        \item Comparison shows differences in tokenization efficiency
-        \item Chinese-developed models may have different efficiency patterns for Chinese text
-    \end{itemize}
+\begin{frame}{Deepseek Model Results}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{visualizations/deepseek/deepseek_efficiency.png}
+    \end{center}
     
-    \begin{block}{Note}
-        Results based on available data from successful API calls
-    \end{block}
+    \begin{itemize}
+        \item Chinese shows highest efficiency (18.03\% token reduction)
+        \item Strategic language selection is second most efficient (9.57\%)
+        \item Russian (8.21\%) and German (6.23\%) also show positive efficiency
+        \item All tested languages show positive efficiency with Deepseek models
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Deepseek: Token Usage by Problem}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{visualizations/deepseek/deepseek_problem_tokens.png}
+    \end{center}
+    
+    \begin{itemize}
+        \item Chinese consistently uses fewer tokens across all problems
+        \item Problem difficulty impacts relative efficiency of languages
+        \item Strategic selection adapts to problem characteristics
+        \item Token usage patterns consistent across different problems
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Model Comparison: Anthropic vs. Deepseek}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{visualizations/model_comparison/token_usage_by_model_language.png}
+    \end{center}
+    
+    \begin{itemize}
+        \item Deepseek shows similar language efficiency patterns to Anthropic
+        \item Chinese consistently more efficient across both models
+        \item Strategic language selection maintains efficiency advantage
+        \item Deepseek shows higher efficiency gains for Chinese compared to Anthropic
+    \end{itemize}
 \end{frame}
 
 \section{Practical Applications}

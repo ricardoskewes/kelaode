@@ -1,0 +1,290 @@
+{
+  "baseline_summary": {
+    "english_vs_chinese": {
+      "english_avg_tokens": 537.6,
+      "chinese_avg_tokens": 523.1,
+      "absolute_difference": 14.5,
+      "token_reduction_percent": 2.6971726190476186,
+      "is_chinese_more_efficient": true
+    }
+  },
+  "information_density_analysis": {
+    "information_density_by_prompt": {
+      "response_bits_per_token_mean": {
+        "chinese": 7.089881229434771,
+        "english": 15.556590164961046
+      },
+      "response_bits_per_token_std": {
+        "chinese": 1.032218114283682,
+        "english": 2.8964957277639476
+      },
+      "response_bits_per_token_median": {
+        "chinese": 6.767392828894167,
+        "english": 16.01072257290705
+      },
+      "response_chinese_ratio_mean": {
+        "chinese": 0.47542085213437507,
+        "english": 0.0
+      },
+      "response_chinese_ratio_std": {
+        "chinese": 0.163796661609646,
+        "english": 0.0
+      },
+      "response_chinese_ratio_median": {
+        "chinese": 0.4876243781094527,
+        "english": 0.0
+      },
+      "response_chinese_chars_per_token_mean": {
+        "chinese": 0.5359411713292104,
+        "english": 0.0
+      },
+      "response_chinese_chars_per_token_std": {
+        "chinese": 0.11274097188754079,
+        "english": 0.0
+      },
+      "response_chinese_chars_per_token_median": {
+        "chinese": 0.5373716012084593,
+        "english": 0.0
+      },
+      "response_compression_ratio_mean": {
+        "chinese": 0.5948320907613172,
+        "english": 1.0
+      },
+      "response_compression_ratio_std": {
+        "chinese": 0.08628675948032967,
+        "english": 0.0
+      },
+      "response_compression_ratio_median": {
+        "chinese": 0.5775621717159145,
+        "english": 1.0
+      }
+    },
+    "information_density_comparisons": {
+      "english_vs_chinese_bits": {
+        "absolute_difference": -8.466708935526274,
+        "percent_difference": -54.42522330244518,
+        "chinese_more_dense": false,
+        "density_gain": 54.42522330244518
+      }
+    }
+  },
+  "benchmark_difficulty_analysis": {
+    "benchmark_grouped": {
+      "benchmark": {
+        "0": "ARC-Challenge",
+        "1": "ARC-Challenge",
+        "2": "BBH",
+        "3": "BBH",
+        "4": "GSM8K",
+        "5": "GSM8K",
+        "6": "HotpotQA",
+        "7": "HotpotQA",
+        "8": "MATH",
+        "9": "MATH"
+      },
+      "prompt_type": {
+        "0": "chinese",
+        "1": "english",
+        "2": "chinese",
+        "3": "english",
+        "4": "chinese",
+        "5": "english",
+        "6": "chinese",
+        "7": "english",
+        "8": "chinese",
+        "9": "english"
+      },
+      "total_tokens_mean": {
+        "0": 660.5,
+        "1": 679.0,
+        "2": 469.5,
+        "3": 415.5,
+        "4": 496.5,
+        "5": 462.0,
+        "6": 473.5,
+        "7": 406.0,
+        "8": 515.5,
+        "9": 725.5
+      },
+      "total_tokens_std": {
+        "0": 43.1335136523794,
+        "1": 73.53910524340094,
+        "2": 21.920310216782973,
+        "3": 77.07463914933368,
+        "4": 21.920310216782973,
+        "5": 59.39696961966999,
+        "6": 6.363961030678928,
+        "7": 12.727922061357855,
+        "8": 58.68986283848344,
+        "9": 41.71930009000631
+      },
+      "total_tokens_count": {
+        "0": 2,
+        "1": 2,
+        "2": 2,
+        "3": 2,
+        "4": 2,
+        "5": 2,
+        "6": 2,
+        "7": 2,
+        "8": 2,
+        "9": 2
+      },
+      "response_bits_per_token_mean": {
+        "0": 6.958498031146005,
+        "1": 19.038884998570573,
+        "2": 8.980979253204987,
+        "3": 16.01072257290705,
+        "4": 6.481613851524786,
+        "5": 13.69006996910047,
+        "6": 6.25384486301699,
+        "7": 17.63504538382007,
+        "8": 6.774470148281086,
+        "9": 11.408227900407063
+      },
+      "response_chinese_ratio_mean": {
+        "0": 0.6147469101399863,
+        "1": 0.0,
+        "2": 0.311897572871908,
+        "3": 0.0,
+        "4": 0.4876243781094527,
+        "5": 0.0,
+        "6": 0.6741535161636281,
+        "7": 0.0,
+        "8": 0.28868188338690054,
+        "9": 0.0
+      },
+      "response_compression_ratio_mean": {
+        "0": 0.5202588186228729,
+        "1": 1.0,
+        "2": 0.6812849933634728,
+        "3": 1.0,
+        "4": 0.5775621717159145,
+        "5": 1.0,
+        "6": 0.49720854480721155,
+        "7": 1.0,
+        "8": 0.6978459252971138,
+        "9": 1.0
+      }
+    },
+    "difficulty_grouped": {
+      "difficulty": {
+        "0": "hard",
+        "1": "hard",
+        "2": "medium",
+        "3": "medium"
+      },
+      "prompt_type": {
+        "0": "chinese",
+        "1": "english",
+        "2": "chinese",
+        "3": "english"
+      },
+      "total_tokens_mean": {
+        "0": 542.1666666666666,
+        "1": 518.8333333333334,
+        "2": 494.5,
+        "3": 565.75
+      },
+      "total_tokens_std": {
+        "0": 95.45557430902959,
+        "1": 137.11224112626365,
+        "2": 41.829017041602434,
+        "3": 186.1744253829367
+      },
+      "total_tokens_count": {
+        "0": 6,
+        "1": 6,
+        "2": 4,
+        "3": 4
+      },
+      "response_bits_per_token_mean": {
+        "0": 7.473697045291925,
+        "1": 16.246559180192698,
+        "2": 6.514157505649038,
+        "3": 14.521636642113567
+      },
+      "response_chinese_ratio_mean": {
+        "0": 0.4714229537071157,
+        "1": 0.0,
+        "2": 0.4814176997752643,
+        "3": 0.0
+      },
+      "response_compression_ratio_mean": {
+        "0": 0.5930353279007534,
+        "1": 1.0,
+        "2": 0.5975272350521627,
+        "3": 1.0
+      }
+    },
+    "benchmark_efficiency": {
+      "MATH": {
+        "english_tokens": 725.5,
+        "chinese_tokens": 515.5,
+        "token_difference": 210.0,
+        "percent_difference": 28.945554789800138,
+        "chinese_more_efficient": true,
+        "efficiency_gain": 28.945554789800138
+      },
+      "BBH": {
+        "english_tokens": 415.5,
+        "chinese_tokens": 469.5,
+        "token_difference": -54.0,
+        "percent_difference": -12.996389891696749,
+        "chinese_more_efficient": false,
+        "efficiency_gain": 12.996389891696749
+      },
+      "HotpotQA": {
+        "english_tokens": 406.0,
+        "chinese_tokens": 473.5,
+        "token_difference": -67.5,
+        "percent_difference": -16.625615763546797,
+        "chinese_more_efficient": false,
+        "efficiency_gain": 16.625615763546797
+      },
+      "ARC-Challenge": {
+        "english_tokens": 679.0,
+        "chinese_tokens": 660.5,
+        "token_difference": 18.5,
+        "percent_difference": 2.72459499263623,
+        "chinese_more_efficient": true,
+        "efficiency_gain": 2.72459499263623
+      },
+      "GSM8K": {
+        "english_tokens": 462.0,
+        "chinese_tokens": 496.5,
+        "token_difference": -34.5,
+        "percent_difference": -7.467532467532467,
+        "chinese_more_efficient": false,
+        "efficiency_gain": 7.467532467532467
+      }
+    },
+    "difficulty_efficiency": {
+      "medium": {
+        "english_tokens": 565.75,
+        "chinese_tokens": 494.5,
+        "token_difference": 71.25,
+        "percent_difference": 12.593901900132568,
+        "chinese_more_efficient": true,
+        "efficiency_gain": 12.593901900132568
+      },
+      "hard": {
+        "english_tokens": 518.8333333333334,
+        "chinese_tokens": 542.1666666666666,
+        "token_difference": -23.333333333333258,
+        "percent_difference": -4.4972695149373445,
+        "chinese_more_efficient": false,
+        "efficiency_gain": 4.4972695149373445
+      }
+    }
+  },
+  "visualization_info": {
+    "visualizations_created": [
+      "token_usage_by_benchmark_detailed.png",
+      "information_density_detailed.png",
+      "chinese_character_metrics.png",
+      "efficiency_by_difficulty.png",
+      "compression_ratio_by_benchmark.png"
+    ]
+  }
+}

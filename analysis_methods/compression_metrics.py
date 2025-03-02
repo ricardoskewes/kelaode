@@ -194,7 +194,41 @@ def calculate_normalized_compression_metrics(results_df):
     
     return pd.DataFrame(compression_metrics)
 
-def calculate_language_compression_index(results_df):
+def calculate_lci_weights(
+    token_efficiency,
+    information_density_ratio,
+    character_efficiency,
+    context_length_efficiency=None
+):
+    """
+    Calculate the Language Compression Index (LCI) based on provided metrics.
+    
+    Args:
+        token_efficiency: Token efficiency relative to English
+        information_density_ratio: Information density ratio relative to English
+        character_efficiency: Character efficiency relative to English
+        context_length_efficiency: Context length efficiency relative to English (optional)
+        
+    Returns:
+        Language Compression Index (LCI)
+    """
+    # If context length efficiency is provided, include it in the calculation
+    if context_length_efficiency is not None:
+        return (
+            0.5 * token_efficiency +
+            0.2 * information_density_ratio +
+            0.1 * character_efficiency +
+            0.2 * context_length_efficiency
+        )
+    else:
+        # Use the original calculation
+        return (
+            0.6 * token_efficiency +
+            0.3 * information_density_ratio +
+            0.1 * character_efficiency
+        )
+
+def calculate_language_compression_index(results_df, context_length_efficiencies=None):
     """
     Calculate a comprehensive Language Compression Index (LCI) for multiple languages.
     The LCI quantifies how efficiently each language encodes information in tokens
@@ -202,6 +236,8 @@ def calculate_language_compression_index(results_df):
     
     Args:
         results_df: DataFrame containing experiment results
+        context_length_efficiencies: Optional dictionary mapping languages to context length
+                                    efficiency values relative to English
         
     Returns:
         DataFrame with Language Compression Index for each language
@@ -250,10 +286,18 @@ def calculate_language_compression_index(results_df):
         # Higher values mean the language uses more characters per token
         char_efficiency = lang_chars_per_token / english_chars_per_token if english_chars_per_token > 0 else 0
         
-        # Calculate Language Compression Index
-        # LCI = (token_efficiency * 0.6) + (info_density_ratio * 0.3) + (char_efficiency * 0.1)
-        # Weights prioritize token efficiency while accounting for information density and character usage
-        lci = (token_efficiency * 0.6) + (info_density_ratio * 0.3) + (char_efficiency * 0.1)
+        # Get context length efficiency if provided
+        context_length_efficiency = None
+        if context_length_efficiencies and lang in context_length_efficiencies:
+            context_length_efficiency = context_length_efficiencies[lang]
+        
+        # Calculate Language Compression Index using the weighted formula
+        lci = calculate_lci_weights(
+            token_efficiency,
+            info_density_ratio,
+            char_efficiency,
+            context_length_efficiency
+        )
         
         # Calculate token reduction percentage
         token_reduction = ((english_tokens_mean - lang_tokens_mean) / english_tokens_mean) * 100 if english_tokens_mean > 0 else 0
@@ -265,6 +309,7 @@ def calculate_language_compression_index(results_df):
             'token_efficiency': token_efficiency,
             'info_density_ratio': info_density_ratio,
             'char_efficiency': char_efficiency,
+            'context_length_efficiency': context_length_efficiency,
             'token_reduction_percent': token_reduction,
             'english_tokens_mean': english_tokens_mean,
             'lang_tokens_mean': lang_tokens_mean

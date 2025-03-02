@@ -308,8 +308,10 @@ def create_deepseek_specific_visualizations(deepseek_df, output_dir):
         data=deepseek_df,
         x='prompt_type',
         y='total_tokens',
+        hue='prompt_type',
         errorbar=('ci', 95),
-        palette='viridis'
+        palette='viridis',
+        legend=False
     )
     plt.title('Deepseek: Token Usage by Language', fontsize=16)
     plt.xlabel('Language', fontsize=14)
@@ -351,7 +353,9 @@ def create_deepseek_specific_visualizations(deepseek_df, output_dir):
         data=efficiency_df,
         x='language',
         y='efficiency',
-        palette='viridis'
+        hue='language',
+        palette='viridis',
+        legend=False
     )
     
     plt.title('Deepseek: Efficiency Relative to English', fontsize=16)
