@@ -723,6 +723,210 @@ def create_model_comparison_visualizations(df, output_dir="reports/visualization
         'radar_data': radar_data
     }
 
+def create_language_compression_index_vs_x_charts(df, lci_df=None, output_dir="reports/visualizations/lci_analysis"):
+    """
+    Create scatter plots showing the relationship between Language Compression Index (LCI)
+    and various factors (X) such as benchmark performance, difficulty level, etc.
+    
+    Args:
+        df: DataFrame with experiment results
+        lci_df: DataFrame with Language Compression Index data (optional)
+        output_dir: Directory to save visualizations
+        
+    Returns:
+        Dictionary with analysis results
+    """
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # If LCI DataFrame not provided, calculate it
+    if lci_df is None:
+        from analysis_methods.compression_metrics import calculate_language_compression_index
+        lci_df = calculate_language_compression_index(df)
+    
+    # Create a mapping of language to LCI
+    lci_map = dict(zip(lci_df['language'], lci_df['lci']))
+    
+    # 1. LCI vs. Benchmark Performance
+    # Calculate average token reduction by language and benchmark
+    benchmarks = df['benchmark'].unique()
+    
+    benchmark_performance = []
+    
+    for lang in lci_df['language']:
+        lang_df = df[df['prompt_type'] == lang]
+        
+        for benchmark in benchmarks:
+            benchmark_df = lang_df[lang_df['benchmark'] == benchmark]
+            english_df = df[(df['prompt_type'] == 'english') & (df['benchmark'] == benchmark)]
+            
+            if benchmark_df.empty or english_df.empty:
+                continue
+                
+            lang_tokens = benchmark_df['total_tokens'].mean()
+            english_tokens = english_df['total_tokens'].mean()
+            
+            token_reduction = ((english_tokens - lang_tokens) / english_tokens) * 100 if english_tokens > 0 else 0
+            
+            benchmark_performance.append({
+                'language': lang,
+                'benchmark': benchmark,
+                'token_reduction': token_reduction,
+                'lci': lci_map.get(lang, 0)
+            })
+    
+    # Create DataFrame
+    benchmark_df = pd.DataFrame(benchmark_performance)
+    
+    # Create scatter plot for each benchmark
+    plt.figure(figsize=(14, 10))
+    
+    # Create scatter plot with different colors for each benchmark
+    sns.scatterplot(x='lci', y='token_reduction', hue='benchmark', 
+                    data=benchmark_df, s=100, alpha=0.7)
+    
+    # Add labels and title
+    plt.xlabel('Language Compression Index (LCI)')
+    plt.ylabel('Token Reduction vs. English (%)')
+    plt.title('Language Compression Index vs. Benchmark Performance')
+    
+    # Add a horizontal line at y=0
+    plt.axhline(y=0, color='r', linestyle='--', alpha=0.3)
+    
+    # Add a vertical line at x=1 (English baseline)
+    plt.axvline(x=1, color='r', linestyle='--', alpha=0.3)
+    
+    # Add text labels for each point
+    for i, row in benchmark_df.iterrows():
+        plt.text(row['lci'] + 0.01, row['token_reduction'] + 0.5, 
+                 row['language'], fontsize=8)
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/lci_vs_benchmark_performance.png')
+    plt.close()
+    
+    # 2. LCI vs. Difficulty Level Performance
+    # Calculate average token reduction by language and difficulty
+    difficulties = df['difficulty'].unique()
+    
+    difficulty_performance = []
+    
+    for lang in lci_df['language']:
+        lang_df = df[df['prompt_type'] == lang]
+        
+        for difficulty in difficulties:
+            difficulty_df = lang_df[lang_df['difficulty'] == difficulty]
+            english_df = df[(df['prompt_type'] == 'english') & (df['difficulty'] == difficulty)]
+            
+            if difficulty_df.empty or english_df.empty:
+                continue
+                
+            lang_tokens = difficulty_df['total_tokens'].mean()
+            english_tokens = english_df['total_tokens'].mean()
+            
+            token_reduction = ((english_tokens - lang_tokens) / english_tokens) * 100 if english_tokens > 0 else 0
+            
+            difficulty_performance.append({
+                'language': lang,
+                'difficulty': difficulty,
+                'token_reduction': token_reduction,
+                'lci': lci_map.get(lang, 0)
+            })
+    
+    # Create DataFrame
+    difficulty_df = pd.DataFrame(difficulty_performance)
+    
+    # Create scatter plot for each difficulty
+    plt.figure(figsize=(14, 10))
+    
+    # Create scatter plot with different colors for each difficulty
+    sns.scatterplot(x='lci', y='token_reduction', hue='difficulty', 
+                    data=difficulty_df, s=100, alpha=0.7)
+    
+    # Add labels and title
+    plt.xlabel('Language Compression Index (LCI)')
+    plt.ylabel('Token Reduction vs. English (%)')
+    plt.title('Language Compression Index vs. Difficulty Level Performance')
+    
+    # Add a horizontal line at y=0
+    plt.axhline(y=0, color='r', linestyle='--', alpha=0.3)
+    
+    # Add a vertical line at x=1 (English baseline)
+    plt.axvline(x=1, color='r', linestyle='--', alpha=0.3)
+    
+    # Add text labels for each point
+    for i, row in difficulty_df.iterrows():
+        plt.text(row['lci'] + 0.01, row['token_reduction'] + 0.5, 
+                 row['language'], fontsize=8)
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/lci_vs_difficulty_performance.png')
+    plt.close()
+    
+    # 3. LCI vs. Component Metrics
+    # Create scatter plots for LCI vs. each component metric
+    component_metrics = ['token_efficiency', 'info_density_ratio', 'char_efficiency']
+    
+    for metric in component_metrics:
+        plt.figure(figsize=(14, 10))
+        
+        # Create scatter plot
+        sns.scatterplot(x=metric, y='lci', data=lci_df, s=100, alpha=0.7)
+        
+        # Add labels and title
+        plt.xlabel(metric.replace('_', ' ').title())
+        plt.ylabel('Language Compression Index (LCI)')
+        plt.title(f'Language Compression Index vs. {metric.replace("_", " ").title()}')
+        
+        # Add text labels for each point
+        for i, row in lci_df.iterrows():
+            plt.text(row[metric] + 0.01, row['lci'] + 0.01, 
+                     row['language'], fontsize=10)
+        
+        # Add a linear regression line
+        sns.regplot(x=metric, y='lci', data=lci_df, scatter=False, 
+                    line_kws={'color': 'red', 'linestyle': '--'})
+        
+        plt.tight_layout()
+        plt.savefig(f'{output_dir}/lci_vs_{metric}.png')
+        plt.close()
+    
+    # 4. LCI vs. Token Reduction (Overall)
+    plt.figure(figsize=(14, 10))
+    
+    # Create scatter plot
+    sns.scatterplot(x='lci', y='token_reduction_percent', data=lci_df, s=100, alpha=0.7)
+    
+    # Add labels and title
+    plt.xlabel('Language Compression Index (LCI)')
+    plt.ylabel('Token Reduction vs. English (%)')
+    plt.title('Language Compression Index vs. Overall Token Reduction')
+    
+    # Add a horizontal line at y=0
+    plt.axhline(y=0, color='r', linestyle='--', alpha=0.3)
+    
+    # Add a vertical line at x=1 (English baseline)
+    plt.axvline(x=1, color='r', linestyle='--', alpha=0.3)
+    
+    # Add text labels for each point
+    for i, row in lci_df.iterrows():
+        plt.text(row['lci'] + 0.01, row['token_reduction_percent'] + 0.5, 
+                 row['language'], fontsize=10)
+    
+    # Add a linear regression line
+    sns.regplot(x='lci', y='token_reduction_percent', data=lci_df, scatter=False, 
+                line_kws={'color': 'red', 'linestyle': '--'})
+    
+    plt.tight_layout()
+    plt.savefig(f'{output_dir}/lci_vs_token_reduction.png')
+    plt.close()
+    
+    return {
+        'benchmark_performance': benchmark_df,
+        'difficulty_performance': difficulty_df,
+        'lci_data': lci_df
+    }
+
 def create_all_multilingual_visualizations(df, output_dir="reports/visualizations/multilingual"):
     """
     Create all multilingual visualizations.
@@ -745,6 +949,11 @@ def create_all_multilingual_visualizations(df, output_dir="reports/visualization
     # Create model comparison visualizations
     model_comparison_data = create_model_comparison_visualizations(df, f"{output_dir}/model_comparison")
     
+    # Create Language Compression Index vs. X visualizations
+    from analysis_methods.compression_metrics import calculate_language_compression_index
+    lci_df = calculate_language_compression_index(df)
+    lci_analysis = create_language_compression_index_vs_x_charts(df, lci_df, f"{output_dir}/lci_analysis")
+    
     print(f"All multilingual visualizations created and saved to {output_dir}")
     
     return {
@@ -754,5 +963,6 @@ def create_all_multilingual_visualizations(df, output_dir="reports/visualization
         'heatmap_data': heatmap_data,
         'efficiency_df': efficiency_df,
         'clei_df': clei_df,
-        'model_comparison_data': model_comparison_data
+        'model_comparison_data': model_comparison_data,
+        'lci_analysis': lci_analysis
     }
